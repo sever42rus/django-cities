@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from importlib import import_module
 from collections import defaultdict
+from importlib import import_module
 
 import django
 from django.conf import settings as django_settings
 from django.core.exceptions import ImproperlyConfigured
-from django.utils.translation import ugettext_lazy as _
+
+if float('.'.join(map(str, django.VERSION[:2]))) < 3:
+    from django.utils.translation import ugettext_lazy as _
+else:
+    from django.utils.translation import gettext_lazy as _
 
 __all__ = [
     'city_types', 'district_types',
@@ -268,12 +272,12 @@ class HookException(Exception):
 
 # Hook functions that a plugin class may define
 plugin_hooks = [
-    'country_pre',     'country_post',  # noqa: E241
-    'region_pre',      'region_post',  # noqa: E241
-    'subregion_pre',   'subregion_post',  # noqa: E241
-    'city_pre',        'city_post',  # noqa: E241
-    'district_pre',    'district_post',  # noqa: E241
-    'alt_name_pre',    'alt_name_post',  # noqa: E241
+    'country_pre', 'country_post',  # noqa: E241
+    'region_pre', 'region_post',  # noqa: E241
+    'subregion_pre', 'subregion_post',  # noqa: E241
+    'city_pre', 'city_post',  # noqa: E241
+    'district_pre', 'district_post',  # noqa: E241
+    'alt_name_pre', 'alt_name_post',  # noqa: E241
     'postal_code_pre', 'postal_code_post',  # noqa: E241
 ]
 

@@ -13,3 +13,4 @@ dist
 
 # Data files
 /cities/data/*
+.vscode

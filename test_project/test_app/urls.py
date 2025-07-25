@@ -1,14 +1,18 @@
-from django.conf.urls import url
+try:
+    from django.conf.urls import url
+except ImportError:
+    from django.urls import re_path as url
+
 from django.contrib import admin
 from django.core.exceptions import ImproperlyConfigured
 
 from cities.util import patterns
 
-
 app_name = "test_app"
 
 try:
     from django.conf.urls import include
+
     # Django < 2.0
     urlpatterns = patterns(
         '',

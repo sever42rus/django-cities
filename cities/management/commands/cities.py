@@ -32,30 +32,42 @@ except ImportError:
 
 from itertools import chain
 from optparse import make_option
-from swapper import load_model
-from tqdm import tqdm
 
 from django import VERSION as django_version
 from django.contrib.gis.gdal.envelope import Envelope
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import D
+from swapper import load_model
+from tqdm import tqdm
+
 try:
     from django.contrib.gis.db.models.functions import Distance
 except ImportError:
     pass
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import CharField
+from django.db.models import ForeignKey
 from django.db.models import Q
-from django.db.models import CharField, ForeignKey
 
-from ...conf import (city_types, district_types, import_opts, import_opts_all,
-                     HookException, settings, CURRENCY_SYMBOLS,
-                     INCLUDE_AIRPORT_CODES, INCLUDE_NUMERIC_ALTERNATIVE_NAMES,
-                     NO_LONGER_EXISTENT_COUNTRY_CODES,
-                     SKIP_CITIES_WITH_EMPTY_REGIONS, VALIDATE_POSTAL_CODES)
-from ...models import (Region, Subregion, District, PostalCode, AlternativeName)
+from ...conf import CURRENCY_SYMBOLS
+from ...conf import INCLUDE_AIRPORT_CODES
+from ...conf import INCLUDE_NUMERIC_ALTERNATIVE_NAMES
+from ...conf import NO_LONGER_EXISTENT_COUNTRY_CODES
+from ...conf import SKIP_CITIES_WITH_EMPTY_REGIONS
+from ...conf import VALIDATE_POSTAL_CODES
+from ...conf import HookException
+from ...conf import city_types
+from ...conf import district_types
+from ...conf import import_opts
+from ...conf import import_opts_all
+from ...conf import settings
+from ...models import AlternativeName
+from ...models import District
+from ...models import PostalCode
+from ...models import Region
+from ...models import Subregion
 from ...util import geo_distance
-
 
 # Interpret all files as utf-8
 if sys.version_info < (3,):
@@ -203,7 +215,7 @@ class Command(BaseCommand):
                 file.write(web_file.read())
                 file.close()
             elif not os.path.exists(os.path.join(self.data_dir, filename)):
-                raise Exception("File not found and download failed: {} [{}]".format(filename, url))
+                raise Exception("File not found and download failed: {} [{}]".format(filename, urls))
 
     def get_data(self, filekey):
         if 'filename' in settings.files[filekey]:
@@ -298,7 +310,7 @@ class Command(BaseCommand):
             # Make importing countries idempotent
             with transaction.atomic():
                 country, created = Country.objects.update_or_create(id=country_id, defaults=defaults)
-            
+
             self.logger.debug("%s country '%s'",
                               "Added" if created else "Updated",
                               defaults['name'])
@@ -369,7 +381,7 @@ class Command(BaseCommand):
 
             with transaction.atomic():
                 region, created = Region.objects.update_or_create(id=region_id, defaults=defaults)
-            
+
             if not self.call_hook('region_post', region, item):
                 continue
 
@@ -442,7 +454,7 @@ class Command(BaseCommand):
 
             with transaction.atomic():
                 subregion, created = Subregion.objects.update_or_create(id=subregion_id, defaults=defaults)
-            
+
             if not self.call_hook('subregion_post', subregion, item):
                 continue
 
@@ -548,10 +560,10 @@ class Command(BaseCommand):
                             self.logger.debug("%s: %s: Cannot find subregion: '%s'",
                                               country_code, item['name'], subregion_code)
                         defaults['subregion'] = None
-            
+
             with transaction.atomic():
                 city, created = City.objects.update_or_create(id=city_id, defaults=defaults)
-            
+
             if not self.call_hook('city_post', city, item):
                 continue
 
@@ -677,7 +689,7 @@ class Command(BaseCommand):
                     setattr(district, key, value)
                 with transaction.atomic():
                     district.save()
-                
+
                 created = False
 
             if not self.call_hook('district_post', district, item):
@@ -1077,7 +1089,7 @@ class Command(BaseCommand):
 
             with transaction.atomic():
                 pc.save()
-            
+
             if not self.call_hook('postal_code_post', pc, item):
                 continue
 

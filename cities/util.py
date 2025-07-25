@@ -1,17 +1,26 @@
 import re
-import six
 import sys
 import unicodedata
-from math import radians, sin, cos, acos
+from math import acos
+from math import cos
+from math import radians
+from math import sin
+
+import six
 from django import VERSION as DJANGO_VERSION
-try:
-    from django.utils.encoding import force_unicode as force_text
-except (NameError, ImportError):
-    from django.utils.encoding import force_text
-from django.utils.safestring import mark_safe, SafeText
+
+if DJANGO_VERSION < (4, 0):
+    try:
+        from django.utils.encoding import force_unicode as force_text
+    except (NameError, ImportError):
+        from django.utils.encoding import force_text
+else:
+    from django.utils.encoding import force_str as force_text
+
+from django.utils.safestring import SafeText
+from django.utils.safestring import mark_safe
 
 from .conf import CONTINENT_DATA
-
 
 if sys.version_info < (3, 0):
     unicode_func = unicode  # noqa: F821
